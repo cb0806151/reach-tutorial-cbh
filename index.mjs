@@ -11,6 +11,12 @@ import * as backend from './build/index.main.mjs';
   const ctcAlice = alice.deploy(backend);
   const ctcBob = bob.attach(backend, ctcAlice.getInfo());
 
+  const fmt = (x) => stdlib.formatCurrency(x, 4);
+  const getBalance = async (who) => fmt(await stdlib.balanceOf(who));
+
+  const beforeAlice = await getBalance(alice);
+  const beforeBob = await getBalance(bob);
+
   const HAND = ['Rock', 'Paper', 'Scissors'];
   const OUTCOME = ['Bob wins', 'Draw', 'Alice wins'];
   const Player = (Who) => ({
@@ -24,8 +30,26 @@ import * as backend from './build/index.main.mjs';
     },
   });
 
+  const aliceActions = {
+    ...Player('Alice'),
+    wager: stdlib.parseCurrency(5),
+  }
+
+  const bobActions = {
+    ...Player('Bob'),
+    acceptWager: (amt) => {
+      console.log(`Bob accepts the wager of ${fmt(amt)}`)
+    }
+  }
+
   await Promise.all([
-    backend.Alice(ctcAlice, Player('Alice')),
-    backend.Bob(ctcBob, Player('Bob')),
+    backend.Alice(ctcAlice, aliceActions),
+    backend.Bob(ctcBob, bobActions),
   ]);
+
+  const afterAlice = await getBalance(alice);
+  const afterBob = await getBalance(bob);
+
+  console.log(`Alice went from ${beforeAlice} to ${afterAlice}.`);
+  console.log(`Bob went from ${beforeBob} to ${afterBob}.`);
 })();
