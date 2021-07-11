@@ -1,3 +1,4 @@
 reach
 .dockerignore
 build
+scaffold/reach
